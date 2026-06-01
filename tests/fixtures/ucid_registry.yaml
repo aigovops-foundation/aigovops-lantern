@@ -1,0 +1,30 @@
+apiVersion: govops.aigovops.org/v1
+kind: Crosswalk
+metadata:
+  name: unified-control-id-test-fixture
+  description: Test fixture mirroring umbrella-govops crosswalks/unified-control-id.yaml shape.
+  designated_expert: bobrapp
+
+ucids:
+  - id: UCID-DATA-BIAS-001
+    title: Dataset bias examination
+    status: provisional
+    created: 2026-04-12
+    proposer: bobrapp
+    nist_ai_rmf: [MEASURE-2.11, MAP-2.3, MANAGE-2.3]
+    eu_ai_act:
+      articles: ["10(2)(f)", "10(3)"]
+      annex_iv: ["2(d)", "2(g)"]
+    iso_42001: ["A.7.4"]
+    implementing_controls: [DG-002]
+
+  - id: UCID-OVERSIGHT-001
+    title: Human oversight measures
+    status: provisional
+    created: 2026-04-12
+    proposer: bobrapp
+    nist_ai_rmf: [GOVERN-3.2, MANAGE-4.1]
+    eu_ai_act:
+      articles: ["14(1)", "14(4)"]
+    iso_42001: ["A.6.2.2"]
+    implementing_controls: [HO-001]

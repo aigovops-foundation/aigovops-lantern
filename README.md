@@ -14,35 +14,114 @@ for the people doing the work: engineers reviewing a PR, compliance
 leads scoping a control, auditors tracing an evidence bundle, and
 regulators reading a crosswalk.
 
-> **Status:** v0.0 — namespace reserved · scoping in progress. First
-> stable cut targeted for Q3 2026.
+**Status:** v0.1.0-alpha · CLI shipped · 43 tests · ruff/mypy strict clean
 
 ---
 
+## Install
+
+```bash
+pip install aigovops-lantern   # once published; for now:
+pip install git+https://github.com/bobrapp/aigovops-lantern.git
+```
+
+Requires Python 3.11+.
+
+## Three commands
+
+### 1. `lantern read`
+
+Render a Beacon-signed evidence bundle (NDJSON, JSONL, or JSON array) as
+text, Markdown, or JSON — optionally through a role lens.
+
+```bash
+lantern read ./evidence-bundle.ndjson
+lantern read -f markdown -r auditor ./evidence-bundle.ndjson
+lantern read -f json ./evidence-bundle.ndjson | jq '.event_types'
+```
+
+Output (Markdown excerpt):
+
+```markdown
+# Bundle: `evidence-bundle.ndjson`
+
+_AIGovOps Lantern — Beacon signs. Lantern reads._
+
+> **Auditor view.** Focus on the chain of custody: who produced each
+> receipt, when, in which environment, and whether the receipt carries
+> a signature.
+
+- **Receipts:** 46
+- **Signed:** 46 of 46
+- **Distinct event types:** 7
+- **Distinct evidence types:** 41
+```
+
+### 2. `lantern diff`
+
+Compare two bundles. The narrative is targeted to a role: engineers see
+pipeline-integrity callouts; compliance sees UCID mapping prompts;
+auditors get chain-of-custody flags; regulators see framework-citation
+deltas.
+
+```bash
+lantern diff ./before.ndjson ./after.ndjson
+lantern diff -r engineer ./before.ndjson ./after.ndjson
+lantern diff -f markdown -r compliance ./before.ndjson ./after.ndjson \
+  >> $GITHUB_STEP_SUMMARY
+```
+
+### 3. `lantern explain`
+
+Resolve a Unified Control Identifier (UCID) against the
+[Umbrella-GovOps UCID Registry](https://github.com/bobrapp/umbrella-govops/blob/main/UCID-REGISTRY.md)
+and render its framework citations.
+
+```bash
+lantern explain UCID-DATA-BIAS-001
+lantern explain --registry ../umbrella-govops/crosswalks/unified-control-id.yaml \
+  UCID-OVERSIGHT-001
+```
+
+Output:
+
+```
+# UCID-DATA-BIAS-001 — Dataset bias examination
+
+Status: provisional
+
+NIST AI RMF: MEASURE-2.11, MAP-2.3, MANAGE-2.3
+EU AI Act: Articles 10(2)(f), 10(3) · Annex IV 2(d), 2(g)
+ISO/IEC 42001: A.7.4
+Implementing controls: DG-002
+```
+
+Without `--registry`, Lantern falls back to a small embedded snapshot
+used for offline demos. **The registry source of truth lives in
+umbrella-govops** — Lantern never mutates it.
+
 ## Why Lantern
 
-Beacon answers the machine question: *"Is this artifact signed, attested,
-and conformant?"*
+Beacon answers the machine question: *"Is this artifact signed,
+attested, and conformant?"*
 
-Lantern answers the human question: *"Can I, the person who has to act on
-this, understand what it means, what changed, and what I need to do?"*
+Lantern answers the human question: *"Can I, the person who has to act
+on this, understand what it means, what changed, and what I need to do?"*
 
-The Foundation's premise is **humans are worthy** — the carried light, not
-just the spotlight. Lantern is the reader, translator, and dignity layer
-on top of the policy-as-code substrate.
+The Foundation's premise is **humans are worthy** — the carried light,
+not just the spotlight. Lantern is the reader, translator, and dignity
+layer on top of the policy-as-code substrate.
 
-## Scope (v0.1 — draft)
+## Design principles
 
-- **Conformance reader** — render an Umbrella-GovOps evidence bundle
-  (signed by Beacon) into human-readable form: control-by-control diff,
-  attestation chain, UCID crosswalk view.
-- **Plain-language explainers** — every UCID, control, and policy gets a
-  short human gloss derived from the registry, not boilerplate.
-- **Diff & narrative mode** — explain what changed between two evidence
-  bundles in the language of the affected role (engineer, compliance,
-  legal, regulator).
-- **Portable** — runnable as CLI, GitHub Action, and small web view.
-  Carried, not deployed.
+- **Read-only by construction.** Lantern never produces signed
+  artifacts. If a user needs a signature, they go to Beacon.
+- **Local-first.** Works against local files with no network.
+- **No telemetry.** Lantern is a tool people carry — surveillance is
+  inconsistent with the dignity premise.
+- **Small dependency footprint.** Three runtime deps (typer, rich,
+  pyyaml). Auditors and regulators must be able to install Lantern
+  without an enterprise approval chain.
 
 ## Relationship to Beacon
 
@@ -55,19 +134,35 @@ on top of the policy-as-code substrate.
 | Output | Cryptographic artifacts | Human narratives + diffs |
 | Cadence | Per commit / per release | Per review / per question |
 
-Lantern consumes Beacon output. It never re-signs and never asserts
-attestation on its own — that is Beacon's role, and only Beacon's.
+Lantern consumes Beacon output. It never re-signs, and it does not
+verify cryptographic signatures — it reports their *presence*. For
+verified chain-of-custody, run `beacon verify` first.
 
-## Status & roadmap
+## Roadmap
 
-This repository currently serves as the **namespace reservation and
-public scoping ground** for the project. Concrete milestones:
+- **v0.1 (now)** — CLI: `read`, `diff`, `explain`. Three output formats.
+  Four role lenses. UCID lookup against local or embedded registry.
+- **v0.2** — Web view (`lantern serve`). Per-receipt drill-in. Richer
+  diff narratives.
+- **v0.3** — GitHub Action wrapping the CLI to post bundle diffs as PR
+  comments.
+- **v1.0** — Stable role taxonomy. i18n. Reference renderers for at
+  least one major regulator template (e.g., EU AI Act Annex IV form).
 
-- **v0.0 (now)** — README, scope, license, governance pointers
-- **v0.1** — CLI skeleton; read & render a single signed evidence bundle
-- **v0.2** — Diff-mode between two bundles; UCID glossary lookups
-- **v0.3** — GitHub Action wrapping CLI for PR comment rendering
-- **v1.0** — Stable web view + role-specific narrative templates
+## Development
+
+```bash
+git clone https://github.com/bobrapp/aigovops-lantern
+cd aigovops-lantern
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+
+ruff check src tests
+mypy src
+pytest --cov=aigovops_lantern
+```
+
+All commits must be DCO-signed (`git commit -s`).
 
 ## Contributing
 
@@ -77,9 +172,6 @@ broader Umbrella-GovOps framework. Please read:
 - [Umbrella-GovOps GOVERNANCE.md](https://github.com/bobrapp/umbrella-govops/blob/main/GOVERNANCE.md)
 - [Umbrella-GovOps TRADEMARK.md](https://github.com/bobrapp/umbrella-govops/blob/main/TRADEMARK.md)
 - [UCID Registry](https://github.com/bobrapp/umbrella-govops/blob/main/UCID-REGISTRY.md)
-
-All commits must be signed off (DCO) per the Foundation contributing
-policy.
 
 ## License
 

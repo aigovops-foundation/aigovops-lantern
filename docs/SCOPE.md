@@ -1,4 +1,6 @@
-# AIGovOps Lantern — Scope v0.1 (draft)
+# AIGovOps Lantern — Scope v0.1
+
+**Status:** v0.1 shipped (alpha).
 
 > "Beacon signs. Lantern reads."
 
@@ -34,13 +36,18 @@ Lantern is **not**:
 4. **Run in three places**: CLI, GitHub Action (PR comment), small web
    view. No deployed service required to use it.
 
-## Interfaces (sketch)
+## Interfaces (v0.1 shipped)
 
 ```
-lantern read   ./evidence-bundle.json
-lantern diff   ./old.bundle.json ./new.bundle.json --role=engineer
-lantern explain UCID:NIST-AI-RMF:GOVERN-1.1
-lantern serve  --port 8080   # local web view
+lantern read    ./evidence-bundle.ndjson [-f text|markdown|json] [-r engineer|compliance|auditor|regulator]
+lantern diff    ./old.ndjson ./new.ndjson [-f ...] [-r ...]
+lantern explain UCID-DATA-BIAS-001 [--registry ./unified-control-id.yaml] [-f ...]
+```
+
+## Interfaces (deferred to v0.2+)
+
+```
+lantern serve --port 8080   # local web view
 ```
 
 ## Architecture principles

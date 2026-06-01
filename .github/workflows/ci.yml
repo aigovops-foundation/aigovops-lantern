@@ -1,0 +1,56 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Python ${{ matrix.python }} · ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.11", "3.12"]
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install package + dev deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check src tests
+
+      - name: Type check (mypy strict)
+        run: mypy src
+
+      - name: Test (pytest with coverage)
+        run: pytest --cov=aigovops_lantern --cov-report=term-missing --cov-fail-under=80
+
+      - name: Smoke test CLI
+        run: |
+          lantern --version
+          lantern read tests/fixtures/bundle_signed.ndjson
+          lantern diff tests/fixtures/bundle_old.ndjson tests/fixtures/bundle_new.ndjson
+          lantern explain UCID-DATA-BIAS-001
