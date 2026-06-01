@@ -140,14 +140,10 @@ verified chain-of-custody, run `beacon verify` first.
 
 ## Roadmap
 
-- **v0.1 (now)** — CLI: `read`, `diff`, `explain`. Three output formats.
-  Four role lenses. UCID lookup against local or embedded registry.
-- **v0.2** — Web view (`lantern serve`). Per-receipt drill-in. Richer
-  diff narratives.
-- **v0.3** — GitHub Action wrapping the CLI to post bundle diffs as PR
-  comments.
-- **v1.0** — Stable role taxonomy. i18n. Reference renderers for at
-  least one major regulator template (e.g., EU AI Act Annex IV form).
+- **v0.1 (shipped)** — [v0.1.0-alpha release](https://github.com/bobrapp/aigovops-lantern/releases/tag/v0.1.0-alpha). CLI: `read`, `diff`, `explain`. Three output formats. Four role lenses. UCID lookup against local or embedded registry.
+- **v0.2** — Web view for Beacon bundles. Per-receipt drill-in, richer diff narratives, shareable URL state. Tracking: [#2](https://github.com/bobrapp/aigovops-lantern/issues/2).
+- **v0.3** — GitHub Action wrapping `lantern diff` to post bundle diffs as PR comments. Tracking: [#3](https://github.com/bobrapp/aigovops-lantern/issues/3).
+- **v1.0** — Stable role taxonomy. i18n. Reference renderers for at least one major regulator template (e.g., EU AI Act Annex IV form).
 
 ## Development
 
