@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-read.schema.json",
+  "title": "Lantern read output",
+  "description": "Machine-readable summary of a Beacon evidence bundle, as produced by `lantern read -f json`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source", "receipt_count", "receipt_ids", "event_types", "evidence_types", "signed_count"],
+  "properties": {
+    "source": {
+      "type": "string",
+      "description": "Resolved absolute path of the bundle file that was rendered."
+    },
+    "receipt_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of receipts in the bundle (after validation)."
+    },
+    "receipt_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Stable list of receipt IDs in load order. Useful for cross-referencing Beacon's signature manifest."
+    },
+    "event_types": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 },
+      "description": "Counts of each `event_type` value observed (gate.evaluated, gate.failed, bundle.signed, inference.observed, etc.)."
+    },
+    "evidence_types": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 },
+      "description": "Counts of `evidence_type` values observed in receipts that carry them (control_framework, board_minutes, etc.)."
+    },
+    "signed_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of receipts that carry a non-empty `signature` envelope. Lantern reports presence only; cryptographic verification is Beacon's responsibility."
+    }
+  }
+}

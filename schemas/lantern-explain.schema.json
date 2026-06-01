@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-explain.schema.json",
+  "title": "Lantern explain output",
+  "description": "Resolved Unified Control ID (UCID) entry from the umbrella-govops registry, as produced by `lantern explain -f json`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "status"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^UCID-[A-Z0-9-]+-[0-9]{3,6}$",
+      "description": "Canonical Unified Control ID, e.g. UCID-DATA-BIAS-001."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short human-readable name for the control."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["provisional", "stable", "deprecated"],
+      "description": "Lifecycle of the UCID in the upstream registry."
+    },
+    "implementing_controls": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Internal control identifiers in umbrella-govops policy bundles that implement this UCID."
+    },
+    "nist_ai_rmf": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "NIST AI Risk Management Framework citations (MAP-x.x, MEASURE-x.x, MANAGE-x.x, GOVERN-x.x)."
+    },
+    "iso_42001": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "ISO/IEC 42001 Annex A control IDs."
+    },
+    "eu_ai_act_articles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "EU AI Act article-and-paragraph citations."
+    },
+    "eu_ai_act_annex_iv": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "EU AI Act Annex IV technical-documentation point references."
+    }
+  }
+}

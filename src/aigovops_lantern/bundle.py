@@ -159,8 +159,16 @@ def _validate_receipt(obj: object, line_no: int | None = None) -> Receipt:
 
 def _load_ndjson(path: Path) -> tuple[Receipt, ...]:
     receipts: list[Receipt] = []
-    with path.open("r", encoding="utf-8") as fh:
-        for line_no, raw_line in enumerate(fh, start=1):
+    try:
+        fh = path.open("r", encoding="utf-8")
+    except OSError as exc:
+        raise BundleError(f"{path}: cannot open — {exc}") from exc
+    with fh:
+        try:
+            lines = list(enumerate(fh, start=1))
+        except UnicodeDecodeError as exc:
+            raise BundleError(f"{path}: not valid UTF-8 — {exc}") from exc
+        for line_no, raw_line in lines:
             line = raw_line.strip()
             if not line:
                 continue
@@ -175,6 +183,8 @@ def _load_ndjson(path: Path) -> tuple[Receipt, ...]:
 def _load_json_array(path: Path) -> tuple[Receipt, ...]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
+    except UnicodeDecodeError as exc:
+        raise BundleError(f"{path}: not valid UTF-8 — {exc}") from exc
     except json.JSONDecodeError as exc:
         raise BundleError(f"{path}: invalid JSON: {exc}") from exc
     if not isinstance(data, list):

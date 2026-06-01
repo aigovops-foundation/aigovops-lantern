@@ -14,7 +14,7 @@ for the people doing the work: engineers reviewing a PR, compliance
 leads scoping a control, auditors tracing an evidence bundle, and
 regulators reading a crosswalk.
 
-**Status:** v0.1.0-alpha · CLI shipped · 43 tests · ruff/mypy strict clean
+**Status:** v0.1.1 · CLI shipped · 103 tests (unit + E2E + scale + chaos) · 87% coverage · ruff/mypy strict clean · DRAFT OpenAPI for v0.2
 
 ---
 
@@ -144,6 +144,41 @@ verified chain-of-custody, run `beacon verify` first.
 - **v0.2** — Web view for Beacon bundles. Per-receipt drill-in, richer diff narratives, shareable URL state. Tracking: [#2](https://github.com/bobrapp/aigovops-lantern/issues/2).
 - **v0.3** — GitHub Action wrapping `lantern diff` to post bundle diffs as PR comments. Tracking: [#3](https://github.com/bobrapp/aigovops-lantern/issues/3).
 - **v1.0** — Stable role taxonomy. i18n. Reference renderers for at least one major regulator template (e.g., EU AI Act Annex IV form).
+
+## Testing
+
+Lantern ships a four-layer test pyramid. Unit + E2E + schema tests run on every push; scale and chaos tests are opt-in via env flags and run weekly in CI.
+
+| Layer | File | Count | Trigger | What it covers |
+| --- | --- | --- | --- | --- |
+| Unit | `tests/test_*.py` (excluding the three below) | ~43 | every push | Library functions in isolation |
+| E2E | `tests/test_e2e.py` | 39 | every push | CLI invocations via subprocess across every role × format × command combo, plus error paths |
+| Schema | `tests/test_schemas.py` | 7 | every push | JSON Schemas are valid and every `--format json` output validates against its schema |
+| Scale | `tests/test_scale.py` | 3 | `RUN_SCALE=1` or weekly CI | 10k / 50k / 100k receipt bundles against time and RSS-memory budgets |
+| Chaos | `tests/test_chaos.py` | 11 | `RUN_CHAOS=1` or weekly CI | Hypothesis fuzz (random / binary / unicode / UCID) + I/O failure injection (permission errors, truncated files, directory-as-file, malformed YAML) |
+
+```bash
+# default suite (CI default)
+pytest -m "not scale and not chaos"
+
+# scale
+RUN_SCALE=1 pytest -m scale -v
+
+# chaos (Hypothesis + I/O failure injection)
+RUN_CHAOS=1 pytest -m chaos -v
+
+# everything
+RUN_SCALE=1 RUN_CHAOS=1 pytest
+```
+
+## API definition
+
+Lantern's machine-readable contracts live in two places:
+
+- [`/schemas`](./schemas) — JSON Schema 2020-12 documents for every `--format json` output (`read`, `diff`, `explain`). The CLI and the planned web view return the same shapes.
+- [`/docs/api`](./docs/api) — DRAFT OpenAPI 3.1 spec for the v0.2 web view ([`openapi.yaml`](./docs/api/openapi.yaml)), plus [`data-model.md`](./docs/api/data-model.md), [`flows.md`](./docs/api/flows.md) (Mermaid sequence diagrams), and [`actions.md`](./docs/api/actions.md) (event-type × role-lens matrix).
+
+The v0.2 web view is tracked in [#2](https://github.com/bobrapp/aigovops-lantern/issues/2); the spec is published with v0.1 so downstream tooling can generate clients against a stable contract.
 
 ## Development
 

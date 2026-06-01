@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-diff.schema.json",
+  "title": "Lantern diff output",
+  "description": "Machine-readable comparison of two Beacon evidence bundles, as produced by `lantern diff -f json`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["old", "new", "added_ids", "removed_ids", "kept_count", "event_deltas"],
+  "properties": {
+    "old": {
+      "type": "string",
+      "description": "Resolved path of the baseline (older) bundle."
+    },
+    "new": {
+      "type": "string",
+      "description": "Resolved path of the candidate (newer) bundle."
+    },
+    "added_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Receipt IDs present in `new` but not in `old`."
+    },
+    "removed_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Receipt IDs present in `old` but not in `new`. A non-empty list deserves auditor attention."
+    },
+    "kept_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of receipt IDs that appear in both bundles."
+    },
+    "event_deltas": {
+      "type": "array",
+      "description": "Per-event-type counts in each bundle, useful for spotting regressions like a sudden drop in gate.evaluated or rise in gate.failed.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event", "old", "new"],
+        "properties": {
+          "event": { "type": "string" },
+          "old": { "type": "integer", "minimum": 0 },
+          "new": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

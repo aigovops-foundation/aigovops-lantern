@@ -1,0 +1,75 @@
+site_name: AIGovOps Lantern™
+site_description: The human-carried companion to AIGovOps Beacon. Beacon signs. Lantern reads.
+site_url: https://bobrapp.github.io/aigovops-lantern/
+repo_url: https://github.com/bobrapp/aigovops-lantern
+repo_name: bobrapp/aigovops-lantern
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - content.code.copy
+    - content.tabs.link
+    - search.suggest
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: amber
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: amber
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            members_order: source
+            docstring_style: google
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - CLI reference: cli.md
+  - API:
+      - Data model: api/data-model.md
+      - Actions: api/actions.md
+      - Flows: api/flows.md
+      - OpenAPI (v0.2 draft): api/openapi.md
+  - Python API:
+      - aigovops_lantern.bundle: python/bundle.md
+      - aigovops_lantern.render: python/render.md
+      - aigovops_lantern.ucid: python/ucid.md
+      - aigovops_lantern.cli: python/cli.md
+  - Roadmap: roadmap.md

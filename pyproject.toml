@@ -46,6 +46,14 @@ dev = [
     "ruff>=0.5",
     "mypy>=1.10",
     "types-PyYAML>=6.0",
+    "hypothesis>=6.100",
+    "psutil>=5.9",
+    "jsonschema>=4.22",
+]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.25",
 ]
 
 [project.scripts]
@@ -77,6 +85,12 @@ max-complexity = 20
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
+markers = [
+    "unit: fast in-process tests of pure functions and classes",
+    "e2e: end-to-end tests that shell out to the installed `lantern` CLI",
+    "scale: large-input throughput tests (skipped unless RUN_SCALE=1)",
+    "chaos: fuzz + I/O failure injection (skipped unless RUN_CHAOS=1 in fast CI)",
+]
 
 [tool.mypy]
 python_version = "3.11"

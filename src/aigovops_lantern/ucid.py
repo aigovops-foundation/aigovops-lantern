@@ -134,7 +134,10 @@ def load_registry(path: str | Path | None = None) -> dict[str, Ucid]:
     if not p.exists():
         raise UcidError(f"registry not found: {p}")
 
-    raw = yaml.safe_load(p.read_text(encoding="utf-8"))
+    try:
+        raw = yaml.safe_load(p.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        raise UcidError(f"{p}: malformed YAML — {exc}") from exc
     if not isinstance(raw, dict) or "ucids" not in raw:
         raise UcidError(f"{p}: not a UCID registry (no top-level 'ucids' key)")
 

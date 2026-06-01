@@ -1,0 +1,272 @@
+openapi: 3.1.0
+info:
+  title: AIGovOps Lantern — Web View API (v0.2 draft)
+  version: 0.2.0-draft
+  description: |
+    **STATUS: DRAFT. Not yet implemented.** This contract scopes the planned
+    v0.2 web viewer (tracked in [issue #2](https://github.com/bobrapp/aigovops-lantern/issues/2)).
+    Publishing it now lets downstream tooling code against a stable shape before
+    the service exists.
+
+    The web view is a thin HTTP wrapper around the same renderer the CLI uses.
+    Every endpoint takes (or produces) JSON that conforms to the published
+    schemas under `/schemas`. The contract intentionally mirrors the CLI surface
+    one-for-one so the two stay in lockstep.
+
+    **What this API is not.** It does not verify Beacon signatures (that is
+    Beacon's job — Lantern reports presence only). It does not persist bundles
+    across requests. It does not authenticate users in v0.2; assume the service
+    runs behind your existing reverse proxy or zero-trust mesh.
+  contact:
+    name: AIGovOps Foundation
+    url: https://github.com/bobrapp/aigovops-lantern
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8765
+    description: Local development
+  - url: https://lantern.example.org
+    description: Reference deployment (placeholder)
+tags:
+  - name: render
+    description: Convert a Beacon bundle into a human-readable representation.
+  - name: diff
+    description: Compare two bundles and explain what changed.
+  - name: explain
+    description: Resolve a Unified Control ID against a registry.
+  - name: meta
+    description: Health, version, and capability discovery.
+paths:
+  /v1/healthz:
+    get:
+      tags: [meta]
+      summary: Liveness probe
+      operationId: healthz
+      responses:
+        "200":
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /v1/version:
+    get:
+      tags: [meta]
+      summary: Report Lantern and renderer versions
+      operationId: version
+      responses:
+        "200":
+          description: Version info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Version"
+  /v1/render/read:
+    post:
+      tags: [render]
+      summary: Render a bundle (equivalent to `lantern read`)
+      operationId: renderRead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenderReadRequest"
+          application/x-ndjson:
+            schema:
+              type: string
+              format: binary
+              description: Raw NDJSON bundle. The role/format are passed via query parameters.
+      parameters:
+        - in: query
+          name: format
+          schema: { $ref: "#/components/schemas/Format" }
+        - in: query
+          name: role
+          schema: { $ref: "#/components/schemas/Role" }
+      responses:
+        "200":
+          description: Rendered output
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadJsonResponse"
+            text/markdown:
+              schema:
+                type: string
+            text/plain:
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "422":
+          $ref: "#/components/responses/InvalidBundle"
+  /v1/render/diff:
+    post:
+      tags: [diff]
+      summary: Compare two bundles (equivalent to `lantern diff`)
+      operationId: renderDiff
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenderDiffRequest"
+      parameters:
+        - in: query
+          name: format
+          schema: { $ref: "#/components/schemas/Format" }
+        - in: query
+          name: role
+          schema: { $ref: "#/components/schemas/Role" }
+      responses:
+        "200":
+          description: Rendered diff
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiffJsonResponse"
+            text/markdown:
+              schema:
+                type: string
+            text/plain:
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/InvalidBundle"
+  /v1/explain/{ucid}:
+    get:
+      tags: [explain]
+      summary: Resolve a Unified Control ID
+      operationId: explainUcid
+      parameters:
+        - in: path
+          name: ucid
+          required: true
+          schema:
+            type: string
+            pattern: "^UCID-[A-Z0-9-]+-[0-9]{3,6}$"
+            example: UCID-DATA-BIAS-001
+        - in: query
+          name: format
+          schema: { $ref: "#/components/schemas/Format" }
+      responses:
+        "200":
+          description: UCID entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExplainJsonResponse"
+            text/markdown:
+              schema:
+                type: string
+            text/plain:
+              schema:
+                type: string
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  schemas:
+    Format:
+      type: string
+      enum: [text, markdown, json]
+      default: text
+      description: Output format.
+    Role:
+      type: string
+      enum: [engineer, compliance, auditor, regulator]
+      description: Reader perspective. The renderer adjusts tone and call-outs.
+    Health:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+    Version:
+      type: object
+      additionalProperties: false
+      required: [lantern, renderer_api]
+      properties:
+        lantern:
+          type: string
+          example: 0.2.0
+        renderer_api:
+          type: string
+          example: v1
+        python:
+          type: string
+          example: 3.12.4
+    RenderReadRequest:
+      type: object
+      additionalProperties: false
+      required: [bundle]
+      properties:
+        bundle:
+          type: string
+          description: NDJSON / JSONL bundle contents as a single string.
+        format:
+          $ref: "#/components/schemas/Format"
+        role:
+          $ref: "#/components/schemas/Role"
+    RenderDiffRequest:
+      type: object
+      additionalProperties: false
+      required: [old, new]
+      properties:
+        old:
+          type: string
+          description: Baseline bundle contents (NDJSON / JSONL).
+        new:
+          type: string
+          description: Candidate bundle contents (NDJSON / JSONL).
+        format:
+          $ref: "#/components/schemas/Format"
+        role:
+          $ref: "#/components/schemas/Role"
+    ReadJsonResponse:
+      $ref: "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-read.schema.json"
+    DiffJsonResponse:
+      $ref: "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-diff.schema.json"
+    ExplainJsonResponse:
+      $ref: "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-explain.schema.json"
+    Error:
+      type: object
+      additionalProperties: false
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          enum: [bad_request, payload_too_large, invalid_bundle, not_found, internal]
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+  responses:
+    BadRequest:
+      description: Malformed request
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    PayloadTooLarge:
+      description: Bundle exceeds size limit
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    InvalidBundle:
+      description: Bundle did not parse as a Beacon evidence bundle
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: UCID not found in the registry
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
