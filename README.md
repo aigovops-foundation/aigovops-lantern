@@ -220,3 +220,7 @@ See the full [Trademark Policy](https://github.com/bobrapp/umbrella-govops/blob/
 ---
 
 *Maintained by the AIGovOps Foundation · trademark@aigovopsfoundation.org*
+
+## Related Foundation work
+
+- [Redwood v2 (draft FEP)](https://github.com/aigovops-foundation/Redwood-Draft-June-2026) — Foundation Enhancement Proposal currently in WG bootstrap. Tracks ratification of receipt schemas, UCID registry, and viability lens (Ashby + Beer + sociotechnical). See the [ratification project](https://github.com/orgs/aigovops-foundation/projects/1) and [v0.1.0-draft release](https://github.com/aigovops-foundation/Redwood-Draft-June-2026/releases/tag/v0.1.0-draft).
