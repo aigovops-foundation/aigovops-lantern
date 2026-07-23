@@ -1,0 +1,22 @@
+name: red-main-watchdog
+
+# Adopting the estate's shared red-main watchdog (one `uses:` line — the reusable workflow and
+# its rationale live in the Library repo).
+#
+# Scheduled, not on push, because the failure it catches is DURATION: a main that has been red
+# for days while everyone assumes it is green. Two estate repos were exactly that in July 2026,
+# each found only because a human happened to look.
+#
+# Only this lane is adopted here: lantern ships as a python package with no published site (no
+# link checker to point anywhere) and no npm lockfile (nothing for dependency triage to audit).
+
+on:
+  schedule:
+    - cron: "40 15 * * *"   # daily, staggered across the estate
+  workflow_dispatch:
+
+jobs:
+  red-main:
+    uses: aigovops-foundation/aigovops-library-june-ken-bob/.github/workflows/reusable-red-main-watchdog.yml@main
+    with:
+      max_red_hours: 48
