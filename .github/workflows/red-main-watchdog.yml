@@ -15,6 +15,18 @@ on:
     - cron: "40 15 * * *"   # daily, staggered across the estate
   workflow_dispatch:
 
+# The CALLER must grant these. A reusable workflow's permissions can only ever be a SUBSET of
+# its caller's, and the stock default token grants `actions: none` — so without this block the
+# run dies as `startup_failure`: no job, no log, no notification, while the workflow still lists
+# as `active`. A permanently dead alarm that looks configured.
+#
+# Six estate repos were fixed on 2026-08-01. This repo was missed, so its watchdog has never run
+# since adoption on 2026-07-24. It was found on 2026-08-04 by the new CI watchdog (M22), which
+# exists precisely because a lane that never starts cannot report itself.
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   red-main:
     uses: aigovops-foundation/aigovops-library-june-ken-bob/.github/workflows/reusable-red-main-watchdog.yml@main
