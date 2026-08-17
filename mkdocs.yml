@@ -1,8 +1,8 @@
 site_name: AIGovOps Lantern™
 site_description: The human-carried companion to AIGovOps Beacon. Beacon signs. Lantern reads.
-site_url: https://bobrapp.github.io/aigovops-lantern/
-repo_url: https://github.com/bobrapp/aigovops-lantern
-repo_name: bobrapp/aigovops-lantern
+site_url: https://aigovops-foundation.github.io/aigovops-lantern/
+repo_url: https://github.com/aigovops-foundation/aigovops-lantern
+repo_name: aigovops-foundation/aigovops-lantern
 edit_uri: edit/main/docs/
 
 theme:
