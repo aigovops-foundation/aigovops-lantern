@@ -2,7 +2,7 @@
 
 The vocabulary of `event_type` values Lantern recognizes when rendering Beacon
 bundles. These values come from the Beacon receipt schema
-([receipt.schema.json](https://github.com/bobrapp/aigovops-beacon/blob/main/docs/blueprint/artifacts/receipt.schema.json));
+([receipt.schema.json](https://github.com/aigovops-foundation/aigovops-beacon/blob/main/docs/blueprint/artifacts/receipt.schema.json));
 Lantern's job is to interpret them in human terms for each role.
 
 | event_type | What it means | Engineer view | Compliance view | Auditor view | Regulator view |

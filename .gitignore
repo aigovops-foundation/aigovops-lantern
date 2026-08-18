@@ -23,3 +23,6 @@ dist/
 htmlcov/
 node_modules/
 venv/
+
+# mkdocs build output (rendered from docs/, not source)
+site/

@@ -6,7 +6,7 @@ The v0.2 web view is a planned read-only HTTP surface that wraps the same librar
 
 ## View the spec
 
-The raw spec lives at [`docs/api/openapi.yaml`](https://github.com/bobrapp/aigovops-lantern/blob/main/docs/api/openapi.yaml) in the repository.
+The raw spec lives at [`docs/api/openapi.yaml`](https://github.com/aigovops-foundation/aigovops-lantern/blob/main/docs/api/openapi.yaml) in the repository.
 
 Render it locally with any OpenAPI viewer, e.g.:
 
@@ -29,11 +29,11 @@ docker run -p 8080:8080 -e SPEC_URL=/spec/openapi.yaml \
 
 ## Response schemas
 
-All success responses match the JSON Schemas published at [`/schemas`](https://github.com/bobrapp/aigovops-lantern/tree/main/schemas):
+All success responses match the JSON Schemas published at [`/schemas`](https://github.com/aigovops-foundation/aigovops-lantern/tree/main/schemas):
 
-- [`lantern-read.schema.json`](https://github.com/bobrapp/aigovops-lantern/blob/main/schemas/lantern-read.schema.json)
-- [`lantern-diff.schema.json`](https://github.com/bobrapp/aigovops-lantern/blob/main/schemas/lantern-diff.schema.json)
-- [`lantern-explain.schema.json`](https://github.com/bobrapp/aigovops-lantern/blob/main/schemas/lantern-explain.schema.json)
+- [`lantern-read.schema.json`](https://github.com/aigovops-foundation/aigovops-lantern/blob/main/schemas/lantern-read.schema.json)
+- [`lantern-diff.schema.json`](https://github.com/aigovops-foundation/aigovops-lantern/blob/main/schemas/lantern-diff.schema.json)
+- [`lantern-explain.schema.json`](https://github.com/aigovops-foundation/aigovops-lantern/blob/main/schemas/lantern-explain.schema.json)
 
 These are the same shapes returned by the v0.1 CLI when `--format json` is selected, which means a client written against the schemas works against both surfaces.
 
@@ -42,4 +42,4 @@ These are the same shapes returned by the v0.1 CLI when `--format json` is selec
 - [Data model](data-model.md)
 - [Flows](flows.md)
 - [Actions / event types](actions.md)
-- Tracking issue: [aigovops-lantern#2](https://github.com/bobrapp/aigovops-lantern/issues/2)
+- Tracking issue: [aigovops-lantern#2](https://github.com/aigovops-foundation/aigovops-lantern/issues/2)

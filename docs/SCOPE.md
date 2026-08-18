@@ -73,5 +73,5 @@ lantern serve --port 8080   # local web view
 
 ## Companion repo
 
-Beacon: https://github.com/bobrapp/aigovops-beacon
-Umbrella: https://github.com/bobrapp/umbrella-govops
+Beacon: https://github.com/aigovops-foundation/aigovops-beacon
+Umbrella: https://github.com/aigovops-foundation/umbrella-govops

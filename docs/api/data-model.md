@@ -14,7 +14,7 @@ A **bundle** is a sequence of receipts in one of three on-disk forms:
 | `.jsonl` | Alias for `.ndjson` | Same shape; tooling parity. |
 | `.json` | A JSON array of receipts | Convenient for hand-editing tiny bundles in fixtures. |
 
-A **receipt** is a JSON object that conforms to the upstream [OVERT 1.0 receipt schema](https://github.com/bobrapp/aigovops-beacon/blob/main/docs/blueprint/artifacts/receipt.schema.json).
+A **receipt** is a JSON object that conforms to the upstream [OVERT 1.0 receipt schema](https://github.com/aigovops-foundation/aigovops-beacon/blob/main/docs/blueprint/artifacts/receipt.schema.json).
 See [actions.md](actions.md) for the required-field list and the
 `event_type` vocabulary.
 
@@ -42,7 +42,7 @@ bundle.id_set                # frozenset[str]
 
 A UCID is a stable identifier for a control concept (e.g. dataset-bias
 examination, human oversight). UCIDs live in
-[umbrella-govops/crosswalks/unified-control-id.yaml](https://github.com/bobrapp/umbrella-govops/blob/main/crosswalks/unified-control-id.yaml).
+[umbrella-govops/crosswalks/unified-control-id.yaml](https://github.com/aigovops-foundation/umbrella-govops/blob/main/crosswalks/unified-control-id.yaml).
 
 ### Schema
 
@@ -87,9 +87,9 @@ under `/schemas`:
 
 | Command | Schema file | Top-level shape |
 |---|---|---|
-| `lantern read` | [`schemas/lantern-read.schema.json`](../../schemas/lantern-read.schema.json) | `{source, receipt_count, receipt_ids, event_types, evidence_types, signed_count}` |
-| `lantern diff` | [`schemas/lantern-diff.schema.json`](../../schemas/lantern-diff.schema.json) | `{old, new, added_ids, removed_ids, kept_count, event_deltas}` |
-| `lantern explain` | [`schemas/lantern-explain.schema.json`](../../schemas/lantern-explain.schema.json) | `{id, title, status, implementing_controls, nist_ai_rmf, …}` |
+| `lantern read` | [`schemas/lantern-read.schema.json`](https://github.com/aigovops-foundation/aigovops-lantern/blob/main/schemas/lantern-read.schema.json) | `{source, receipt_count, receipt_ids, event_types, evidence_types, signed_count}` |
+| `lantern diff` | [`schemas/lantern-diff.schema.json`](https://github.com/aigovops-foundation/aigovops-lantern/blob/main/schemas/lantern-diff.schema.json) | `{old, new, added_ids, removed_ids, kept_count, event_deltas}` |
+| `lantern explain` | [`schemas/lantern-explain.schema.json`](https://github.com/aigovops-foundation/aigovops-lantern/blob/main/schemas/lantern-explain.schema.json) | `{id, title, status, implementing_controls, nist_ai_rmf, …}` |
 
 A schema-conformance test (`tests/test_schemas.py`) runs in CI to keep
 the schemas honest — if a renderer's output drifts from its schema, CI

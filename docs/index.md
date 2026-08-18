@@ -1,6 +1,6 @@
 # AIGovOps Lantern™
 
-The human-carried companion to [AIGovOps Beacon](https://github.com/bobrapp/aigovops-beacon).
+The human-carried companion to [AIGovOps Beacon](https://github.com/aigovops-foundation/aigovops-beacon).
 **Beacon signs. Lantern reads.**
 
 Lantern turns Beacon evidence bundles — machine-signed NDJSON
@@ -10,7 +10,7 @@ Same source of truth, four different lenses.
 ## Quick start
 
 ```bash
-pip install git+https://github.com/bobrapp/aigovops-lantern.git@v0.1.0-alpha
+pip install git+https://github.com/aigovops-foundation/aigovops-lantern.git@v0.1.0-alpha
 lantern --version
 lantern read bundle.ndjson -f markdown -r auditor
 ```
