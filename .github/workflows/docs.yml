@@ -1,0 +1,79 @@
+name: docs
+
+# Build the mkdocs site and publish it to GitHub Pages.
+#
+# WHY THIS EXISTS. This repo is authored for mkdocs — mkdocs.yml, a Material theme, an
+# mkdocstrings API reference generated from the package — but nothing ever ran mkdocs.
+# Pages was serving main:/docs directly, so GitHub's default Jekyll rendered the raw
+# markdown instead. That "worked" well enough to look fine and quietly produced a header
+# link to the org Pages root, which has never been published: every page carried a link to
+# a 404. The hourly interaction crawl found it; the source looked correct because the
+# source WAS correct — the wrong builder was reading it.
+#
+# So the fix is not a link edit. It is running the build this repo was written for.
+#
+# NOTE FOR WHOEVER ENABLES THIS: Pages must be set to "GitHub Actions" as its source
+# (Settings → Pages → Build and deployment → Source). While it is still set to
+# "Deploy from a branch", this workflow builds and uploads but Jekyll keeps serving, and
+# nothing visibly changes. That switch is a repository-settings change and is deliberately
+# not something this workflow can do for you.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'src/**'          # mkdocstrings renders the API from the package itself
+      - 'pyproject.toml'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race; let a newer commit win rather than queueing behind an old one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      # -e, not a plain install: mkdocstrings imports aigovops_lantern to generate the
+      # Python API pages. Without the package importable those pages build empty and the
+      # site looks complete while silently missing its reference section.
+      - name: Install the package and its docs toolchain
+        run: python -m pip install -e ".[docs]"
+
+      # --strict turns a broken internal link or a missing anchor into a failed build
+      # instead of a page that ships broken. That is the exact defect class this workflow
+      # was created in response to, so the gate belongs here rather than in a crawler an
+      # hour later.
+      - name: Build (strict — broken links fail the build)
+        run: python -m mkdocs build --strict
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

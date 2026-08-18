@@ -4,7 +4,7 @@ info:
   version: 0.2.0-draft
   description: |
     **STATUS: DRAFT. Not yet implemented.** This contract scopes the planned
-    v0.2 web viewer (tracked in [issue #2](https://github.com/bobrapp/aigovops-lantern/issues/2)).
+    v0.2 web viewer (tracked in [issue #2](https://github.com/aigovops-foundation/aigovops-lantern/issues/2)).
     Publishing it now lets downstream tooling code against a stable shape before
     the service exists.
 
@@ -19,7 +19,7 @@ info:
     runs behind your existing reverse proxy or zero-trust mesh.
   contact:
     name: AIGovOps Foundation
-    url: https://github.com/bobrapp/aigovops-lantern
+    url: https://github.com/aigovops-foundation/aigovops-lantern
   license:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
@@ -231,11 +231,11 @@ components:
         role:
           $ref: "#/components/schemas/Role"
     ReadJsonResponse:
-      $ref: "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-read.schema.json"
+      $ref: "https://github.com/aigovops-foundation/aigovops-lantern/schemas/lantern-read.schema.json"
     DiffJsonResponse:
-      $ref: "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-diff.schema.json"
+      $ref: "https://github.com/aigovops-foundation/aigovops-lantern/schemas/lantern-diff.schema.json"
     ExplainJsonResponse:
-      $ref: "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-explain.schema.json"
+      $ref: "https://github.com/aigovops-foundation/aigovops-lantern/schemas/lantern-explain.schema.json"
     Error:
       type: object
       additionalProperties: false

@@ -60,12 +60,12 @@ docs = [
 lantern = "aigovops_lantern.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/bobrapp/aigovops-lantern"
-Documentation = "https://github.com/bobrapp/aigovops-lantern/blob/main/README.md"
-Source = "https://github.com/bobrapp/aigovops-lantern"
-Issues = "https://github.com/bobrapp/aigovops-lantern/issues"
-"Companion: Beacon" = "https://github.com/bobrapp/aigovops-beacon"
-"Companion: Umbrella" = "https://github.com/bobrapp/umbrella-govops"
+Homepage = "https://github.com/aigovops-foundation/aigovops-lantern"
+Documentation = "https://github.com/aigovops-foundation/aigovops-lantern/blob/main/README.md"
+Source = "https://github.com/aigovops-foundation/aigovops-lantern"
+Issues = "https://github.com/aigovops-foundation/aigovops-lantern/issues"
+"Companion: Beacon" = "https://github.com/aigovops-foundation/aigovops-beacon"
+"Companion: Umbrella" = "https://github.com/aigovops-foundation/umbrella-govops"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/aigovops_lantern"]
