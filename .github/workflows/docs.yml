@@ -63,6 +63,16 @@ jobs:
       - name: Build (strict — broken links fail the build)
         run: python -m mkdocs build --strict
 
+      # --strict fails on a broken LINK; it does not check that an in-page ANCHOR has a target.
+      # The four Python-API pages each override show_root_heading to false, so which
+      # #aigovops_lantern.* ids get emitted is governed by one copy-pasted render option on four
+      # pages — if it ever stops emitting them, every nav button on all four goes dead at once and
+      # gets reported as eighteen separate bugs. They are emitted today (58/58 resolve); this
+      # makes that contract enforceable here rather than discovered by a crawler an hour after
+      # the deploy. Runs before upload-pages-artifact, so a dead button never reaches Pages.
+      - name: "Guard — every #aigovops_lantern anchor button has a target"
+        run: python scripts/check_doc_anchors.py site
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
