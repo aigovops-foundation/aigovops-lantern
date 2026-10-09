@@ -5,7 +5,7 @@
 **AIGovOps Lantern™** is the human-carried companion to
 [**AIGovOps Beacon™**](https://github.com/aigovops-foundation/aigovops-beacon) within
 the [**Umbrella-GovOps**](https://github.com/aigovops-foundation/umbrella-govops)
-framework maintained by the [AIGovOps Foundation](https://aigovops.org).
+framework maintained by the [AIGovOps Foundation](https://www.aigovops-foundation.com/).
 
 Where **Beacon** is the always-on policy-as-code runtime — signing,
 attesting, and emitting machine-verifiable artifacts — **Lantern** is
