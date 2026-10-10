@@ -219,7 +219,7 @@ See the full [Trademark Policy](https://github.com/aigovops-foundation/umbrella-
 
 ---
 
-*Maintained by the AIGovOps Foundation · trademark@aigovopsfoundation.org*
+*Maintained by the AIGovOps Foundation · trademark@aigovops-foundation.com*
 
 ## Related Foundation work
 

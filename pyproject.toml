@@ -11,7 +11,7 @@ requires-python = ">=3.11"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [
-    { name = "AIGovOps Foundation", email = "trademark@aigovopsfoundation.org" },
+    { name = "AIGovOps Foundation", email = "trademark@aigovops-foundation.com" },
 ]
 keywords = [
     "ai-governance",
