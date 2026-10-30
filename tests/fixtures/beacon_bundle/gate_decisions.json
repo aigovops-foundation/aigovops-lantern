@@ -1,0 +1,22 @@
+[
+  {
+    "id": "01M656EE0MH8Y3K0S1GYGEB32Z",
+    "inventory_id": "inv_01JBEACONFIXTURE0000000001",
+    "gate_id": "production-readiness",
+    "tier_target": "T2",
+    "result": "FAIL",
+    "reasons_json": "[\"nist-ai-rmf: 61% < 80% required for T2\", \"receipts not flowing in the last 24h\"]",
+    "decided_at_utc": "2026-10-30T01:23:02.804Z",
+    "receipt_id": "01M656EE0MH8Y3K0S1GYGEB32Z"
+  },
+  {
+    "id": "01M656EE0N478JHHHA75M4VWX9",
+    "inventory_id": "inv_01JBEACONFIXTURE0000000001",
+    "gate_id": "production-readiness",
+    "tier_target": "T2",
+    "result": "PASS",
+    "reasons_json": "[]",
+    "decided_at_utc": "2026-10-30T01:23:02.805Z",
+    "receipt_id": "01M656EE0N478JHHHA75M4VWX9"
+  }
+]

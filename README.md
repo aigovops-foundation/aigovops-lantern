@@ -31,10 +31,22 @@ Requires Python 3.11+.
 
 ### 1. `lantern read`
 
-Render a Beacon-signed evidence bundle (NDJSON, JSONL, or JSON array) as
-text, Markdown, or JSON — optionally through a role lens.
+Render a Beacon-signed evidence bundle as text, Markdown, or JSON —
+optionally through a role lens. Input can be a receipts file (NDJSON, JSONL,
+a JSON array, or one receipt object such as a single gate-decision receipt),
+a **Beacon audit bundle directory** (`manifest.json` + `receipts/*.ndjson` +
+`gate_decisions.json`, as written by `beacon export` / `beacon-scan`), or an
+`umbrella-conformance bundle --out` directory (`receipts.ndjson`).
+
+Gate-decision receipts (`event_type: gate_decision`) render as a table of
+gate, tier target, result and reasons; a Beacon bundle directory also reports
+whether `manifest.sha256` still matches, whether receipt counts match the
+manifest, and whether every `gate_decisions.json` row points at a receipt.
+Lantern still never verifies signatures — that is `beacon-verify`'s job.
 
 ```bash
+lantern read ./beacon-bundle-2026-10-29/          # a Beacon audit bundle directory
+lantern read -f markdown -r compliance ./out/receipts.ndjson
 lantern read ./evidence-bundle.ndjson
 lantern read -f markdown -r auditor ./evidence-bundle.ndjson
 lantern read -f json ./evidence-bundle.ndjson | jq '.event_types'
@@ -59,7 +71,10 @@ _AIGovOps Lantern — Beacon signs. Lantern reads._
 
 ### 2. `lantern diff`
 
-Compare two bundles. The narrative is targeted to a role: engineers see
+Compare two bundles. Receipts that describe the same thing (same
+`subject`, or the same gate for gate decisions) are paired and the changed
+fields shown — a rule that went from `C3 hold` to `C1 allow` is flagged as
+**weakened**. The narrative is targeted to a role: engineers see
 pipeline-integrity callouts; compliance sees UCID mapping prompts;
 auditors get chain-of-custody flags; regulators see framework-citation
 deltas.
