@@ -194,3 +194,84 @@ def test_diff_gate_decision_flip(tmp_path: Path) -> None:
     assert {"field": "result", "old": "PASS", "new": "FAIL"}.items() <= changes[0].items()
     out = render_diff(load(old), load(new), fmt="markdown", role="engineer")
     assert "now **fails** its gate" in out
+
+
+# ── Review hardening (PR #16) ─────────────────────────────────────────
+
+
+def _gate_rows() -> list[dict[str, object]]:
+    f = next((BEACON / "receipts").glob("*.ndjson"))
+    return [json.loads(x) for x in f.read_text().splitlines()]
+
+
+def test_gate_decisions_carry_inventory_id_from_gate_rows() -> None:
+    gates = load(BEACON).gate_decisions
+    assert {g.inventory_id for g in gates} == {"inv_01JBEACONFIXTURE0000000001"}
+
+
+def test_gate_changes_do_not_cross_inventory_items(tmp_path: Path) -> None:
+    """A new item's FAIL must not read as an existing item's regression."""
+    invocation, fail, passed = _gate_rows()
+    other_item_fail = dict(fail, id="01OTHER", ts_utc="2099-01-01T00:00:00.000Z",
+                           model="claude-sonnet", version="2026-01-01")
+    old = _write(tmp_path / "old.ndjson", [invocation, passed])
+    new = _write(tmp_path / "new.ndjson", [invocation, passed, other_item_fail])
+    assert [c for c in compute_changes(load(old), load(new)) if c["field"] == "result"] == []
+
+
+def test_gate_reason_and_tier_changes_are_reported(tmp_path: Path) -> None:
+    invocation, fail, _ = _gate_rows()
+    attrs = dict(fail["attributes"], tier_target="T3", reasons=["a different reason"])  # type: ignore[arg-type]
+    later = dict(fail, id="01LATER", ts_utc="2099-01-01T00:00:00.000Z", attributes=attrs)
+    old = _write(tmp_path / "old.ndjson", [invocation, fail])
+    new = _write(tmp_path / "new.ndjson", [invocation, fail, later])
+    fields = {c["field"] for c in compute_changes(load(old), load(new))}
+    assert {"tier_target", "reasons"} <= fields
+
+
+def test_unlisted_receipt_file_is_reported(tmp_path: Path) -> None:
+    b = tmp_path / "bundle"
+    shutil.copytree(BEACON, b)
+    src = next((b / "receipts").glob("*.ndjson"))
+    shutil.copy(src, b / "receipts" / "2099-01-01.ndjson")
+    problems = load(b).beacon.problems  # type: ignore[union-attr]
+    assert any("2099-01-01.ndjson is not listed in the manifest" in p for p in problems)
+
+
+def test_missing_receipt_files_map_is_reported(tmp_path: Path) -> None:
+    b = tmp_path / "bundle"
+    shutil.copytree(BEACON, b)
+    m = json.loads((b / "manifest.json").read_text())
+    del m["receipt_files"]
+    (b / "manifest.json").write_text(json.dumps(m))
+    problems = load(b).beacon.problems  # type: ignore[union-attr]
+    assert any("no receipt_files map" in p for p in problems)
+
+
+@pytest.mark.skipif(
+    __import__("os").geteuid() == 0 if hasattr(__import__("os"), "geteuid") else True,
+    reason="needs POSIX permissions and a non-root user",
+)
+def test_unreadable_manifest_is_a_bundle_error(tmp_path: Path) -> None:
+    b = tmp_path / "bundle"
+    shutil.copytree(BEACON, b)
+    (b / "manifest.json").chmod(0o000)
+    try:
+        with pytest.raises(BundleError, match="cannot read"):
+            load(b)
+        r = runner.invoke(app, ["read", str(b)])
+        assert r.exit_code == 2
+    finally:
+        (b / "manifest.json").chmod(0o644)
+
+
+def test_receipt_text_is_not_rich_markup(tmp_path: Path) -> None:
+    """A reason like `[link=…]PASS[/link]` must print literally, not as markup."""
+    invocation, fail, _ = _gate_rows()
+    evil = "[green]PASS[/green] [link=https://evil.example]details[/link]"
+    attrs = dict(fail["attributes"], reasons=[evil])  # type: ignore[arg-type]
+    p = _write(tmp_path / "evil.ndjson", [invocation, dict(fail, attributes=attrs)])
+    out = render_bundle(load(p), fmt="text")
+    # Table cells wrap, so look for the literal markup fragments, not the whole string.
+    assert "[green]" in out and "[/green]" in out
+    assert "[link=" in out

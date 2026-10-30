@@ -17,6 +17,7 @@ import json
 from typing import Literal
 
 from rich.console import Console
+from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 
@@ -59,6 +60,7 @@ _CHANGE_FIELDS = (
     "reason",
     "result",
     "tier_target",
+    "reasons",
     "status",
 )
 
@@ -173,11 +175,20 @@ def _controls_markdown(bundle: Bundle) -> list[str]:
     return lines
 
 
-def _change_key(r: Receipt) -> str | None:
-    g = r.gate_decision
+def _gate_key(g: GateDecision, r: Receipt) -> str:
+    # Never pair decisions across inventory items. With no inventory id
+    # (a receipt outside a Beacon bundle), the model identity stands in.
+    item = g.inventory_id or f"{r.vendor}/{r.model}@{r.raw.get('version', '?')}/{r.environment}"
+    return f"gate://{g.gate}/{item}"
+
+
+def _comparable(r: Receipt, g: GateDecision | None) -> dict[str, object]:
+    a: dict[str, object] = dict(r.attributes)
     if g is not None:
-        return f"gate://{g.gate}/{g.inventory_id or '-'}"
-    return r.subject
+        a["result"] = g.result
+        a["tier_target"] = g.tier_target
+        a["reasons"] = "; ".join(g.reasons) if g.reasons else None
+    return a
 
 
 def _weakened(field_name: str, old: object, new: object) -> bool:
@@ -197,25 +208,23 @@ def compute_changes(old: Bundle, new: Bundle) -> list[dict[str, object]]:
     a lower tier — the Knight Capital case: a policy change is itself a
     governed event.
     """
-    def latest(b: Bundle) -> dict[str, Receipt]:
-        out: dict[str, Receipt] = {}
+    def latest(b: Bundle) -> dict[str, tuple[Receipt, GateDecision | None]]:
+        gates = {g.receipt_id: g for g in b.gate_decisions}
+        out: dict[str, tuple[Receipt, GateDecision | None]] = {}
         for r in sorted(b.receipts, key=lambda x: x.ts_utc):
-            k = _change_key(r)
+            g = gates.get(r.id)
+            k = _gate_key(g, r) if g is not None else r.subject
             if k is not None:
-                out[k] = r
+                out[k] = (r, g)
         return out
 
     old_by, new_by = latest(old), latest(new)
     changes: list[dict[str, object]] = []
     for key in sorted(set(old_by) & set(new_by)):
-        o, n = old_by[key], new_by[key]
+        (o, og), (n, ng) = old_by[key], new_by[key]
         if o.id == n.id:
             continue
-        oa = dict(o.attributes)
-        na = dict(n.attributes)
-        og, ng = o.gate_decision, n.gate_decision
-        if og is not None and ng is not None:
-            oa["result"], na["result"] = og.result, ng.result
+        oa, na = _comparable(o, og), _comparable(n, ng)
         for f in _CHANGE_FIELDS:
             if oa.get(f) != na.get(f):
                 changes.append(
@@ -306,7 +315,7 @@ def _bundle_to_markdown(bundle: Bundle, role: Role | None) -> str:
 def _bundle_to_text(bundle: Bundle, role: Role | None) -> str:
     console = Console(record=True, force_terminal=True, width=100)
 
-    header = f"[bold]Bundle:[/bold] {bundle.source.name}"
+    header = f"[bold]Bundle:[/bold] {escape(bundle.source.name)}"
     subtitle = "Beacon signs. Lantern reads."
     console.print(Panel(f"{header}\n[dim]{subtitle}[/dim]", border_style="cyan"))
 
@@ -329,7 +338,7 @@ def _bundle_to_text(bundle: Bundle, role: Role | None) -> str:
         ev_table.add_column("Event")
         ev_table.add_column("Count", justify="right")
         for ev, count in sorted(bundle.event_types.items(), key=lambda kv: -kv[1]):
-            ev_table.add_row(ev, str(count))
+            ev_table.add_row(escape(ev), str(count))
         console.print(ev_table)
         console.print()
 
@@ -338,7 +347,7 @@ def _bundle_to_text(bundle: Bundle, role: Role | None) -> str:
         et_table.add_column("Type")
         et_table.add_column("Count", justify="right")
         for et, count in sorted(bundle.evidence_type_counts.items(), key=lambda kv: -kv[1]):
-            et_table.add_row(et, str(count))
+            et_table.add_row(escape(et), str(count))
         console.print(et_table)
         console.print()
 
@@ -363,12 +372,13 @@ def _text_sections(console: Console, bundle: Bundle) -> None:
             b.manifest_sha256_ok
         ]
         console.print(
-            f"[bold]Beacon audit bundle[/bold] v{b.beacon_version or '?'} · "
-            f"{b.signing_algorithm or '?'} · keys {', '.join(b.public_key_fingerprints) or '-'} · "
+            f"[bold]Beacon audit bundle[/bold] v{escape(b.beacon_version or '?')} · "
+            f"{escape(b.signing_algorithm or '?')} · "
+            f"keys {escape(', '.join(b.public_key_fingerprints) or '-')} · "
             f"manifest.sha256 {sha} · gate_decisions.json rows {b.gate_decision_rows}"
         )
         for problem in b.problems:
-            console.print(f"[yellow]⚠ {problem}[/yellow]")
+            console.print(f"[yellow]⚠ {escape(problem)}[/yellow]")
         console.print()
     gates = bundle.gate_decisions
     if gates:
@@ -378,11 +388,11 @@ def _text_sections(console: Console, bundle: Bundle) -> None:
         for g in gates:
             style = "green" if g.passed else "red"
             t.add_row(
-                g.receipt_id,
-                g.gate,
-                g.tier_target or "-",
-                f"[{style}]{g.result}[/{style}]",
-                "; ".join(g.reasons) or "-",
+                escape(g.receipt_id),
+                escape(g.gate),
+                escape(g.tier_target or "-"),
+                f"[{style}]{escape(g.result)}[/{style}]",
+                escape("; ".join(g.reasons) or "-"),
             )
         console.print(t)
         console.print()
@@ -394,10 +404,10 @@ def _text_sections(console: Console, bundle: Bundle) -> None:
         for r in controls:
             a = r.attributes
             t.add_row(
-                str(a.get("action", r.subject or "?")),
-                str(a.get("tier", "-")),
-                str(a.get("decision")),
-                str(a.get("approver_role") or a.get("reason") or "-"),
+                escape(str(a.get("action", r.subject or "?"))),
+                escape(str(a.get("tier", "-"))),
+                escape(str(a.get("decision"))),
+                escape(str(a.get("approver_role") or a.get("reason") or "-")),
             )
         console.print(t)
         console.print()
@@ -459,7 +469,9 @@ def render_diff(
         return narrative
     # text uses Rich for color
     console = Console(record=True, force_terminal=True, width=100)
-    console.print(narrative)
+    # markup=False: subjects, reasons and ids come from the bundle and must
+    # never be interpreted as Rich markup (or hyperlinks).
+    console.print(narrative, markup=False)
     return console.export_text()
 
 

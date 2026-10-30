@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -228,6 +228,8 @@ class Bundle:
     source: Path
     receipts: tuple[Receipt, ...] = field(default_factory=tuple)
     beacon: BeaconBundleInfo | None = None
+    # receipt_id -> inventory_id, from a Beacon bundle's gate_decisions.json
+    gate_inventory: dict[str, str] = field(default_factory=dict)
 
     def __len__(self) -> int:
         return len(self.receipts)
@@ -257,7 +259,16 @@ class Bundle:
 
     @property
     def gate_decisions(self) -> list[GateDecision]:
-        return [g for r in self.receipts if (g := r.gate_decision) is not None]
+        out: list[GateDecision] = []
+        for r in self.receipts:
+            g = r.gate_decision
+            if g is None:
+                continue
+            inv = self.gate_inventory.get(g.receipt_id)
+            if inv is not None and g.inventory_id is None:
+                g = replace(g, inventory_id=inv)
+            out.append(g)
+        return out
 
 
 def _validate_receipt(obj: object, line_no: int | None = None) -> Receipt:
@@ -337,9 +348,47 @@ def is_beacon_bundle_dir(path: Path) -> bool:
     return path.is_dir() and (path / "manifest.json").is_file() and (path / "receipts").is_dir()
 
 
+def _read_bytes(p: Path) -> bytes:
+    try:
+        return p.read_bytes()
+    except OSError as exc:
+        raise BundleError(f"{p}: cannot read — {exc}") from exc
+
+
+def _manifest_counts(
+    declared: object, files: list[Path], counts: dict[str, int]
+) -> list[str]:
+    """Compare receipts/ against the manifest's receipt_files map, both ways."""
+    if not isinstance(declared, dict):
+        return ["manifest.json has no receipt_files map — receipt counts cannot be checked"]
+    out: list[str] = []
+    for f in files:
+        if f.name not in declared:
+            out.append(f"receipts/{f.name} is not listed in the manifest")
+        elif declared[f.name] != counts[f.name]:
+            out.append(
+                f"receipts/{f.name} holds {counts[f.name]} receipt(s); "
+                f"manifest declares {declared[f.name]}"
+            )
+    for name in sorted(set(declared) - {f.name for f in files}):
+        out.append(f"manifest lists receipts/{name}, which is missing")
+    return out
+
+
+def _load_gate_rows(path: Path) -> list[Any]:
+    gd = path / "gate_decisions.json"
+    if not gd.is_file():
+        return []
+    try:
+        loaded = json.loads(_read_bytes(gd).decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise BundleError(f"{gd}: invalid JSON — {exc}") from exc
+    return loaded if isinstance(loaded, list) else []
+
+
 def _load_beacon_bundle(path: Path) -> Bundle:
     manifest_path = path / "manifest.json"
-    manifest_bytes = manifest_path.read_bytes()
+    manifest_bytes = _read_bytes(manifest_path)
     try:
         manifest = json.loads(manifest_bytes)
     except (json.JSONDecodeError, UnicodeDecodeError) as exc:
@@ -350,41 +399,32 @@ def _load_beacon_bundle(path: Path) -> Bundle:
     sha_ok: bool | None = None
     sha_file = path / "manifest.sha256"
     if sha_file.is_file():
-        parts = sha_file.read_text(encoding="utf-8", errors="replace").split()
+        parts = _read_bytes(sha_file).decode("utf-8", errors="replace").split()
         sha_ok = bool(parts) and parts[0].lower() == hashlib.sha256(manifest_bytes).hexdigest()
 
     files = sorted((path / "receipts").glob("*.ndjson"))
     if not files:
         raise BundleError(f"{path}: Beacon bundle has no receipts/*.ndjson")
-    declared = manifest.get("receipt_files") or {}
     receipts: list[Receipt] = []
-    mismatches: list[str] = []
+    counts: dict[str, int] = {}
     for f in files:
         rows = _load_ndjson(f)
-        want = declared.get(f.name) if isinstance(declared, dict) else None
-        if want is not None and want != len(rows):
-            mismatches.append(
-                f"receipts/{f.name} holds {len(rows)} receipt(s); manifest declares {want}"
-            )
+        counts[f.name] = len(rows)
         receipts.extend(rows)
-    if isinstance(declared, dict):
-        for name in sorted(set(declared) - {f.name for f in files}):
-            mismatches.append(f"manifest lists receipts/{name}, which is missing")
+    mismatches = _manifest_counts(manifest.get("receipt_files"), files, counts)
 
     ids = {r.id for r in receipts}
-    gate_rows: list[Any] = []
-    gd = path / "gate_decisions.json"
-    if gd.is_file():
-        try:
-            loaded = json.loads(gd.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, UnicodeDecodeError) as exc:
-            raise BundleError(f"{gd}: invalid JSON — {exc}") from exc
-        gate_rows = loaded if isinstance(loaded, list) else []
+    gate_rows = _load_gate_rows(path)
     dangling = tuple(
         str(row.get("receipt_id"))
         for row in gate_rows
         if isinstance(row, dict) and row.get("receipt_id") not in ids
     )
+    gate_inventory = {
+        str(row["receipt_id"]): str(row["inventory_id"])
+        for row in gate_rows
+        if isinstance(row, dict) and row.get("receipt_id") in ids and row.get("inventory_id")
+    }
 
     keys = manifest.get("public_key_fingerprints") or []
     info = BeaconBundleInfo(
@@ -398,7 +438,9 @@ def _load_beacon_bundle(path: Path) -> Bundle:
         gate_decision_rows=len(gate_rows),
         dangling_gate_rows=dangling,
     )
-    return Bundle(source=path, receipts=tuple(receipts), beacon=info)
+    return Bundle(
+        source=path, receipts=tuple(receipts), beacon=info, gate_inventory=gate_inventory
+    )
 
 
 def _opt_str(v: object) -> str | None:
