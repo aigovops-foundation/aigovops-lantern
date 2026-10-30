@@ -1,0 +1,16 @@
+[
+  {
+    "id": "01M656EE08J1HGSG469HF4TH56",
+    "vendor": "openai",
+    "model": "gpt-4o",
+    "version": "2024-08-06",
+    "environment": "prod",
+    "owner_email": null,
+    "trust_tier": "T0",
+    "first_seen_utc": "2026-10-30T01:23:02.792Z",
+    "last_seen_utc": "2026-10-30T01:23:02.805Z",
+    "discovery_src": "beacon-scan",
+    "notes": null,
+    "receipt_count": 3
+  }
+]

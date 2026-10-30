@@ -1,0 +1,27 @@
+{
+  "beacon_version": "0.1.0",
+  "generated_at_utc": "2026-10-30T01:23:02.811Z",
+  "generated_by": "beacon-scan",
+  "scope": {
+    "inventory_ids": [
+      "01M656EE08J1HGSG469HF4TH56"
+    ],
+    "from_date": null,
+    "to_date": null
+  },
+  "active_key_fingerprint": "SHA256:n16+zsqvjvDa7qz/bCyXgrV8PtAJP7X/1QpbvaUZJSk",
+  "public_key_fingerprints": [
+    "9f5ebececaaf8ef0"
+  ],
+  "signing_algorithm": "Ed25519",
+  "canonical_form": "json/c14n-rfc8785",
+  "receipt_files": {
+    "2026-10-30.ndjson": 3
+  },
+  "verification": {
+    "receipts_verified": 3,
+    "receipts_failed": 0,
+    "failures": []
+  },
+  "note": "Verify independently with the steps in VERIFY.md. Beacon's self-verification is convenience, not proof."
+}

@@ -5,7 +5,14 @@
   "description": "Machine-readable summary of a Beacon evidence bundle, as produced by `lantern read -f json`.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["source", "receipt_count", "receipt_ids", "event_types", "evidence_types", "signed_count"],
+  "required": [
+    "source",
+    "receipt_count",
+    "receipt_ids",
+    "event_types",
+    "evidence_types",
+    "signed_count"
+  ],
   "properties": {
     "source": {
       "type": "string",
@@ -18,23 +25,134 @@
     },
     "receipt_ids": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "Stable list of receipt IDs in load order. Useful for cross-referencing Beacon's signature manifest."
     },
     "event_types": {
       "type": "object",
-      "additionalProperties": { "type": "integer", "minimum": 0 },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      },
       "description": "Counts of each `event_type` value observed (gate.evaluated, gate.failed, bundle.signed, inference.observed, etc.)."
     },
     "evidence_types": {
       "type": "object",
-      "additionalProperties": { "type": "integer", "minimum": 0 },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      },
       "description": "Counts of `evidence_type` values observed in receipts that carry them (control_framework, board_minutes, etc.)."
     },
     "signed_count": {
       "type": "integer",
       "minimum": 0,
       "description": "Number of receipts that carry a non-empty `signature` envelope. Lantern reports presence only; cryptographic verification is Beacon's responsibility."
+    },
+    "gate_decisions": {
+      "type": "array",
+      "description": "Gate decisions recorded by gate-decision receipts (Beacon `event_type: gate_decision`, or `gate.evaluated` / `gate.failed`), in load order.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "receipt_id",
+          "gate",
+          "result",
+          "tier_target",
+          "reasons"
+        ],
+        "properties": {
+          "receipt_id": {
+            "type": "string"
+          },
+          "gate": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "description": "As written by the gate, e.g. PASS / FAIL."
+          },
+          "tier_target": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "beacon_bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Present when the input was a Beacon audit bundle directory (manifest.json + receipts/). Integrity observations only; Lantern never verifies signatures.",
+      "required": [
+        "beacon_version",
+        "generated_at_utc",
+        "signing_algorithm",
+        "public_key_fingerprints",
+        "manifest_sha256_ok",
+        "receipt_files",
+        "gate_decision_rows",
+        "problems"
+      ],
+      "properties": {
+        "beacon_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated_at_utc": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "signing_algorithm": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "public_key_fingerprints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "manifest_sha256_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "true = manifest.sha256 matches manifest.json; false = mismatch; null = no manifest.sha256."
+        },
+        "receipt_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "gate_decision_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "problems": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }

@@ -21,7 +21,7 @@ lantern read BUNDLE [--format {text|markdown|json}] [--role ROLE]
 
 | Flag | Default | What it does |
 |---|---|---|
-| `BUNDLE` | _required_ | Path to a `.ndjson`, `.jsonl`, or `.json` bundle file. |
+| `BUNDLE` | _required_ | A `.ndjson` / `.jsonl` / `.json` receipts file (a JSON file may hold one receipt), a Beacon audit bundle directory (`manifest.json` + `receipts/`), or a directory holding exactly one receipts file (e.g. `umbrella-conformance bundle --out`). |
 | `-f`, `--format` | `text` | Output format. `text` uses a Rich panel; `markdown` is PR-comment ready; `json` conforms to [`lantern-read.schema.json`](api/data-model.md#3-output-schemas-the-public-contract). |
 | `-r`, `--role` | _(none)_ | Reader lens — one of `engineer`, `compliance`, `auditor`, `regulator`. Adjusts tone and call-outs. |
 
