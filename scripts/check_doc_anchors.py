@@ -109,7 +109,12 @@ def check(site: Path) -> list[str]:
 
 
 def main(argv: list[str]) -> int:
-    site = Path(argv[0] if argv else "site")
+    # resolve() is load-bearing, not tidiness. Cross-page links are resolved to absolute paths
+    # in check(), and looked up among the pages found under `site`. With a relative `site`
+    # (which is how CI calls this: `check_doc_anchors.py site`) those two never matched, every
+    # cross-page link was treated as "not a built page" and skipped, and a dead anchor on
+    # another page passed. Locked by tests/test_doc_anchor_guard.py.
+    site = Path(argv[0] if argv else "site").resolve()
     if not site.exists():
         print(f"anchor guard: {site} does not exist — run `mkdocs build` first", file=sys.stderr)
         return 1
