@@ -14,7 +14,7 @@ for the people doing the work: engineers reviewing a PR, compliance
 leads scoping a control, auditors tracing an evidence bundle, and
 regulators reading a crosswalk.
 
-**Status:** v0.1.1 · CLI shipped · 103 tests (unit + E2E + scale + chaos) · 87% coverage · ruff/mypy strict clean · DRAFT OpenAPI for v0.2
+**Status:** 0.1.0a1 · CLI shipped · 129 tests (unit + E2E + scale + chaos) · 87% coverage · ruff/mypy strict clean · DRAFT OpenAPI for v0.2
 
 ---
 
@@ -166,7 +166,7 @@ Lantern ships a four-layer test pyramid. Unit + E2E + schema tests run on every 
 
 | Layer | File | Count | Trigger | What it covers |
 | --- | --- | --- | --- | --- |
-| Unit | `tests/test_*.py` (excluding the three below) | ~43 | every push | Library functions in isolation |
+| Unit | `tests/test_*.py` (excluding the four below) | 69 | every push | Library functions in isolation |
 | E2E | `tests/test_e2e.py` | 39 | every push | CLI invocations via subprocess across every role × format × command combo, plus error paths |
 | Schema | `tests/test_schemas.py` | 7 | every push | JSON Schemas are valid and every `--format json` output validates against its schema |
 | Scale | `tests/test_scale.py` | 3 | `RUN_SCALE=1` or weekly CI | 10k / 50k / 100k receipt bundles against time and RSS-memory budgets |

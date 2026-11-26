@@ -58,7 +58,7 @@ jobs:
           lantern explain UCID-DATA-BIAS-001
 
   nightly-scale-chaos:
-    name: Nightly scale + chaos
+    name: Weekly scale + chaos
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 30
