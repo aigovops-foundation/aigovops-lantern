@@ -6,7 +6,7 @@ AIGovOps Lantern is the read-only **viewer** half of the AIGovOps Foundation too
 
 The [v0.1.0-alpha release](https://github.com/aigovops-foundation/aigovops-lantern/releases/tag/v0.1.0-alpha) ships:
 
-- `lantern read` — render a receipt bundle for one of four role lenses (operator, auditor, exec, dev) in markdown, JSON, or table
+- `lantern read` — render a receipt bundle for one of four role lenses (engineer, compliance, auditor, regulator) in text, Markdown, or JSON
 - `lantern diff` — show the delta between two bundles
 - `lantern explain` — crosswalk a UCID to NIST AI RMF, ISO 42001, and EU AI Act articles
 - Stable JSON output schemas under [`/schemas`](https://github.com/aigovops-foundation/aigovops-lantern/tree/main/schemas)
