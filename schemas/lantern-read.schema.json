@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-read.schema.json",
+  "$id": "https://github.com/aigovops-foundation/aigovops-lantern/schemas/lantern-read.schema.json",
   "title": "Lantern read output",
   "description": "Machine-readable summary of a Beacon evidence bundle, as produced by `lantern read -f json`.",
   "type": "object",

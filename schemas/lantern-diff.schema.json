@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-diff.schema.json",
+  "$id": "https://github.com/aigovops-foundation/aigovops-lantern/schemas/lantern-diff.schema.json",
   "title": "Lantern diff output",
   "description": "Machine-readable comparison of two Beacon evidence bundles, as produced by `lantern diff -f json`.",
   "type": "object",

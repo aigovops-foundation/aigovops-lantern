@@ -669,7 +669,7 @@ def render_ucid(u: Ucid, fmt: RenderFormat) -> str:
     lines.append("")
     lines.append("> Source of truth: ")
     lines.append(
-        "> https://github.com/bobrapp/umbrella-govops/blob/main/UCID-REGISTRY.md"
+        "> https://github.com/aigovops-foundation/umbrella-govops/blob/main/UCID-REGISTRY.md"
     )
 
     md = "\n".join(lines)
