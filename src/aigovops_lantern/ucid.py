@@ -1,7 +1,7 @@
 """UCID registry loader & lookup.
 
 The Unified Control Identifier (UCID) registry is maintained at
-https://github.com/bobrapp/umbrella-govops/blob/main/crosswalks/unified-control-id.yaml
+https://github.com/aigovops-foundation/umbrella-govops/blob/main/crosswalks/unified-control-id.yaml
 under the Designated Expert review process described in
 ``UCID-REGISTRY.md`` of the same repository.
 

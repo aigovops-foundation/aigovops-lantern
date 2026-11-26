@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/bobrapp/aigovops-lantern/schemas/lantern-explain.schema.json",
+  "$id": "https://github.com/aigovops-foundation/aigovops-lantern/schemas/lantern-explain.schema.json",
   "title": "Lantern explain output",
   "description": "Resolved Unified Control ID (UCID) entry from the umbrella-govops registry, as produced by `lantern explain -f json`.",
   "type": "object",
